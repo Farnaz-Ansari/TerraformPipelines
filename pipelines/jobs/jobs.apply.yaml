@@ -1,0 +1,39 @@
+parameters:
+  - name: key
+    displayName: "Storage account key"
+    type: string
+    default: $(key)
+  - name: storage_account_name
+    displayName: "Storage account name"
+    type: string
+    default: $(storage_account_name)
+  - name: environment
+    displayName: "Environment"
+    type: string
+    default: $(environment)
+
+jobs:
+  - deployment: Apply
+    displayName: Apply
+    pool:
+      vmImage: "ubuntu-latest"
+    environment: "project-app-tf-$(environment)"
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+              displayName: Terraform Install
+              inputs:
+                terraformVersion: "latest"
+            - script: |
+                cd $(Pipeline.Workspace)/terraform-manifests-out
+
+                echo "=====================Terraform Init============================"
+                terraform init -backend-config="access_key=$(terraformstorage-key1)" -backend-config="key=$(key)" -backend-config="storage_account_name=$(storage_account_name)"
+
+                echo "=====================Terraform Plan============================"
+                terraform plan -input=false -var="postgresql-admin-password=$(postgresql-admin-password)" -var-file="variables/$(environment).tfvars" -var environment=$(environment) -out $(Pipeline.Workspace)/terraform-manifests-out/$(environment)-$(Build.BuildId).out -var="client_id=$(project-tf-dev-spn-client-id)" -var="client_secret=$(project-tf-dev-spn-secret)" -var="tenant_id=$(project-tf-dev-spn-tenant-id)"       
+
+                echo "=====================Terraform Apply============================"
+                terraform apply -input=false -auto-approve $(Pipeline.Workspace)/terraform-manifests-out/$(environment)-$(Build.BuildId).out

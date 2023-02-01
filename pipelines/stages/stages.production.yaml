@@ -1,0 +1,9 @@
+stages:
+  - stage: ValidateProduction
+    displayName: 'Terraform Validate Production'
+    jobs:
+      - template: ../jobs/jobs.validate.yaml
+  - stage: ApplyProduction
+    displayName: 'Terraform Apply Production'
+    jobs:
+      - template: ../jobs/jobs.apply.yaml

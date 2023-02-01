@@ -1,0 +1,9 @@
+stages:
+  - stage: ValidateDevelopment
+    displayName: 'Terraform Validate Development'
+    jobs:
+      - template: ../jobs/jobs.validate.yaml
+  - stage: ApplyDevelopment
+    displayName: 'Terraform Apply Development'
+    jobs:
+      - template: ../jobs/jobs.apply.yaml

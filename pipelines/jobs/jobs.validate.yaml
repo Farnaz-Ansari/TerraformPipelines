@@ -1,0 +1,45 @@
+parameters:
+  - name: key
+    displayName: "Storage account key"
+    type: string
+    default: $(key)
+  - name: storage_account_name
+    displayName: "Storage account name"
+    type: string
+    default: $(storage_account_name)
+  - name: environment
+    displayName: "Environment"
+    type: string
+    default: $(environment)
+
+jobs:
+  - job: TerraformValidate
+    continueOnError: false
+    steps:
+      - task: PublishPipelineArtifact@1
+        displayName: Publish Artifacts
+        inputs:
+          targetPath: "$(System.DefaultWorkingDirectory)/terraform/terraform-manifests"
+          artifact: "terraform-manifests-out"
+          publishLocation: "pipeline"
+      - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+        displayName: Terraform Install
+        inputs:
+          terraformVersion: "latest"
+      - task: CmdLine@2
+        displayName: Terraform init
+        inputs:
+          script: >
+            terraform init -backend-config="access_key=$(terraformstorage-key1)" -backend-config="key=$(key)" -backend-config="storage_account_name=$(storage_account_name)"
+          workingDirectory: "$(System.DefaultWorkingDirectory)/terraform/terraform-manifests/"
+      - task: CmdLine@2
+        displayName: Terraform Validate
+        inputs:
+          script: terraform validate
+          workingDirectory: "$(System.DefaultWorkingDirectory)/terraform/terraform-manifests/"
+      - task: CmdLine@2
+        displayName: Terraform Plan
+        inputs:
+          script: >
+            terraform plan -input=false -var="postgresql-admin-password=$(postgresql-admin-password)" -var-file="variables/$(environment).tfvars" -var environment=$(environment) -var="client_id=$(project-tf-dev-spn-client-id)" -var="client_secret=$(project-tf-dev-spn-secret)" -var="tenant_id=$(project-tf-dev-spn-tenant-id)"
+          workingDirectory: "$(System.DefaultWorkingDirectory)/terraform/terraform-manifests/"

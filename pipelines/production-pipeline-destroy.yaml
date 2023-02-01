@@ -1,0 +1,66 @@
+name: $(BuildDefinitionName)_$(date:yyyyMMdd)$(rev:.r)
+
+variables:
+  - template: variables/variables.production.yaml
+
+trigger: none
+
+pr: none
+
+stages:
+  - stage: validate
+    jobs:
+      - job: validate
+        continueOnError: false
+        steps:
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+            displayName: "install"
+            inputs:
+              terraformVersion: "latest"
+          - task: TerraformTaskV2@2
+            displayName: "init"
+            inputs:
+              provider: "azurerm"
+              command: "init"
+              backendServiceArm: "project-tf-sc"
+              backendAzureRmResourceGroupName: "project-app-tf-rg-PROD"
+              backendAzureRmStorageAccountName: "terraformstorageprod"
+              backendAzureRmContainerName: "terraform-state"
+              backendAzureRmKey: "$(key)"
+              workingDirectory: "$(System.DefaultWorkingDirectory)/terraform/terraform-manifests/"
+          - task: TerraformTaskV2@2
+            displayName: "validate"
+            inputs:
+              provider: "azurerm"
+              command: "validate"
+
+  - stage: destroy
+    dependsOn: [validate]
+    condition: succeeded('validate')
+    jobs:
+      - job: terraform_destroy
+        steps:
+          - checkout: self
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+            displayName: "install"
+            inputs:
+              terraformVersion: "latest"
+          - task: TerraformTaskV2@2
+            displayName: "init"
+            inputs:
+              provider: "azurerm"
+              command: "init"
+              backendServiceArm: "project-tf-sc"
+              backendAzureRmResourceGroupName: "project-app-tf-rg-PROD"
+              backendAzureRmStorageAccountName: "terraformstorageprod"
+              backendAzureRmContainerName: "terraform-state"
+              backendAzureRmKey: "$(key)"
+              workingDirectory: "$(System.DefaultWorkingDirectory)/terraform/terraform-manifests/"
+          - task: TerraformTaskV2@2
+            displayName: "destroy"
+            inputs:
+              provider: "azurerm"
+              command: "destroy"
+              commandOptions: '-input=false -var-file="variables/$(environment).tfvars" -var="postgresql-admin-password=$(postgresql-admin-password)" -var="client_id=$(project-tf-dev-spn-client-id)" -var="client_secret=$(project-tf-dev-spn-secret)" -var="tenant_id=$(project-tf-dev-spn-tenant-id)"'
+              environmentServiceNameAzureRM: "project-tf-sc"
+              workingDirectory: "$(System.DefaultWorkingDirectory)/terraform/terraform-manifests/"

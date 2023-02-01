@@ -1,0 +1,50 @@
+module "azure_postgresql" {
+  source                                                    = "./modules/azure-postgresql-database-with-server"
+  resource_group_name                                       = data.azurerm_resource_group.tf_rg.name
+  postgresql-server-name                                    = var.postgresql-server-name
+  postgresql-admin-login                                    = var.postgresql-admin-login
+  postgresql-admin-password                                 = var.postgresql-admin-password
+  postgresql-database-name                                  = var.postgresql-database-name
+  location                                                  = var.location
+  postgresql-version                                        = var.postgresql-version
+  postgresql-sku-name                                       = var.postgresql-sku-name
+  postgresql-storage                                        = var.postgresql-storage
+  postgresql-auto_grow_enabled                              = var.postgresql-auto_grow_enabled
+  postgresql-backup_retention_days                          = var.postgresql-backup_retention_days
+  postgresql-geo_redundant_backup_enabled                   = var.postgresql-geo_redundant_backup_enabled
+  postgresql-public_network_access_enabled                  = var.postgresql-public_network_access_enabled
+  postgresql-ssl_enforcement_enabled                        = var.postgresql-ssl_enforcement_enabled
+  postgresql-ssl_minimal_tls_version_enforced               = var.postgresql-ssl_minimal_tls_version_enforced
+  postgresql-database-charset                               = var.postgresql-database-charset
+  postgresql-database-collation                             = var.postgresql-database-collation
+  postgresql-threat_detection_policy-disabled_alerts        = var.postgresql-threat_detection_policy-disabled_alerts
+  postgresql-threat_detection_policy-email_account_admins   = var.postgresql-threat_detection_policy-email_account_admins 
+  postgresql-threat_detection_policy-email_addresses        = var.postgresql-threat_detection_policy-email_addresses
+  postgresql-threat_detection_policy-enabled                = var.postgresql-threat_detection_policy-enabled 
+  postgresql-threat_detection_policy-retention_days         = var.postgresql-threat_detection_policy-retention_days
+  postgresql-tags                                           = var.postgresql-tags
+}
+
+module "azure_cosmosdb_table" {
+  source                                                    = "./modules/azure-cosmos-database-table"
+  cosmosdb_table_resource_group_name                        = data.azurerm_resource_group.tf_rg.name
+  cosmosdb_table_account_name                               = var.cosmosdb_table_account_name
+  cosmosdb_table_enable_free_tier                           = var.cosmosdb_table_enable_free_tier
+  cosmosdb_table_offer_type                                 = var.cosmosdb_table_offer_type
+  cosmosdb_table_kind                                       = var.cosmosdb_table_kind
+  cosmosdb_table_enable_automatic_failover                  = var.cosmosdb_table_enable_automatic_failover
+  cosmosdb_table_enable_multiple_write_locations            = var.cosmosdb_table_enable_multiple_write_locations
+  cosmosdb_table_is_virtual_network_filter_enabled          = var.cosmosdb_table_is_virtual_network_filter_enabled
+  cosmosdb_table_ip_range_filter                            = var.cosmosdb_table_ip_range_filter
+  cosmosdb_table_key_vault_key_id                           = var.cosmosdb_table_key_vault_key_id
+  cosmosdb_table_tags                                       = var.cosmosdb_table_tags
+  cosmosdb_table_capabilities                               = var.cosmosdb_table_capabilities
+  cosmosdb_table_consistency_policy_consistency_level       = var.cosmosdb_table_consistency_policy_consistency_level
+  cosmosdb_table_consistency_policy_max_interval_in_seconds = var.cosmosdb_table_consistency_policy_max_interval_in_seconds
+  cosmosdb_table_consistency_policy_max_staleness_prefix    = var.cosmosdb_table_consistency_policy_max_staleness_prefix
+  cosmosdb_table_geo_location_failover_priority             = var.cosmosdb_table_geo_location_failover_priority
+  cosmosdb_table_table_names                                = var.cosmosdb_table_table_names
+  cosmosdb_table_throughput                                 = var.cosmosdb_table_throughput
+  cosmosdb_table_max_throughput                             = var.cosmosdb_table_max_throughput
+  location                                                  = var.location
+}

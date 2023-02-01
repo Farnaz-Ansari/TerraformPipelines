@@ -1,0 +1,8 @@
+variables:
+  - group: project-app-tf-kv-production
+  - name: environment
+    value: production
+  - name: key
+    value: project-app-tf-prod.tfstate
+  - name: storage_account_name
+    value: terraformstorageprod

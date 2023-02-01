@@ -1,0 +1,44 @@
+trigger:
+  paths:
+    include:
+      - 'terraform/terraform-manifests/*'
+  branches:
+    include:
+      - refs/heads/main
+      - refs/heads/development
+      - refs/heads/release/*
+
+name: $(Build.SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/development') }}:
+      - template: variables/variables.development.yaml
+  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/release') }}:
+      - template: variables/variables.staging.yaml
+  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+      - template: variables/variables.production.yaml
+
+stages:
+  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/development') }}:
+      - template: stages/stages.development.yaml
+  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/release') }}:
+      - template: stages/stages.staging.yaml
+  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+      - template: stages/stages.production.yaml
+  - ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+      - stage: QualityCheckDevelopment
+        variables:
+          - template: variables/variables.development.yaml
+        condition: startsWith(variables['System.PullRequest.TargetBranch'], 'refs/heads/development')
+        displayName: 'Quality check for development'
+        jobs:
+          - template: ./jobs/jobs.validate.yaml
+      - stage: QualityCheckRelease
+        variables:
+          - template: variables/variables.staging.yaml
+        condition: startsWith(variables['System.PullRequest.TargetBranch'], 'refs/heads/release')
+        displayName: 'Quality check for release'
+        jobs:
+          - template: ./jobs/jobs.validate.yaml
