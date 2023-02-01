@@ -3,7 +3,7 @@ Automate Infrastructure deployment using multi-stage Terraform pipelines to prov
 
 The Infrastructure code is built into reusable modules and individual feature teams can reference them in their working Terraform projects, which can be stored alongside their application code.
 
-## Multi-stage Build pipelines
+## Multi-stage build pipelines
 Development branch is used to deploy the development environment and a release branch is used to deploy the staging and production.
 
 There are 2 Stages: validate and apply.
@@ -14,10 +14,10 @@ First a task publishes artifacts to the pipeline workspace, to share files betwe
 `Terraform plan` outputs a plan and preview the actions Terraform would take to modify the infrastructure but does not change anything yet.
 
 ### Apply job
-Proceeds with Deploying the Azure Resources displayed in the plan.
+`terraform apply` proceeds with deploying the Azure Resources displayed in the plan.
 
 ### Terraform destroy
-`Terraform destroy` reverse the 'terraform apply',  it terminates all the resources specified in the Terraform state.
+`Terraform destroy` reverses the `terraform apply`,  it terminates all the resources specified in the Terraform state.
 Terraform destroy can be triggered through a separate pipeline.
 Pipeline can be manually kicked off, or scheduled to run at 30 days
 
