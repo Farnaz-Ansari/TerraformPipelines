@@ -19,7 +19,7 @@ jobs:
       - task: PublishPipelineArtifact@1
         displayName: Publish Artifacts
         inputs:
-          targetPath: "$(System.DefaultWorkingDirectory)/terraform/terraform-manifests"
+          targetPath: "$(System.DefaultWorkingDirectory)/terraform-manifests"
           artifact: "terraform-manifests-out"
           publishLocation: "pipeline"
       - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
@@ -31,15 +31,15 @@ jobs:
         inputs:
           script: >
             terraform init -backend-config="access_key=$(terraformstorage-key1)" -backend-config="key=$(key)" -backend-config="storage_account_name=$(storage_account_name)"
-          workingDirectory: "$(System.DefaultWorkingDirectory)/terraform/terraform-manifests/"
+          workingDirectory: "$(System.DefaultWorkingDirectory)/terraform-manifests/"
       - task: CmdLine@2
         displayName: Terraform Validate
         inputs:
           script: terraform validate
-          workingDirectory: "$(System.DefaultWorkingDirectory)/terraform/terraform-manifests/"
+          workingDirectory: "$(System.DefaultWorkingDirectory)/terraform-manifests/"
       - task: CmdLine@2
         displayName: Terraform Plan
         inputs:
           script: >
             terraform plan -input=false -var="postgresql-admin-password=$(postgresql-admin-password)" -var-file="variables/$(environment).tfvars" -var environment=$(environment) -var="client_id=$(project-tf-dev-spn-client-id)" -var="client_secret=$(project-tf-dev-spn-secret)" -var="tenant_id=$(project-tf-dev-spn-tenant-id)"
-          workingDirectory: "$(System.DefaultWorkingDirectory)/terraform/terraform-manifests/"
+          workingDirectory: "$(System.DefaultWorkingDirectory)/terraform-manifests/"
